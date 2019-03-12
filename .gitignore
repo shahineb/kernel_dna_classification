@@ -102,3 +102,11 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# datasets
+data/*
+!data/.gitkeep
+
+# OS generated files
+.DS_Store
+*/.DS_Store
