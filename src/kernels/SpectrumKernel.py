@@ -3,6 +3,7 @@ import sys
 import warnings
 from six import string_types
 from itertools import permutations
+from numba import vectorize
 import numpy as np
 
 base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../..")
@@ -53,35 +54,59 @@ class SpectrumKernel(Kernel):
             raise IndexError("Position out of range for tuple")
 
     @accepts(string_types, string_types)
-    def __call__(self, seq1, seq2):
-        """Short summary.
-
+    def _evaluate(self, seq1, seq2):
+        """
         Args:
-            seq1 (type): Description of parameter `seq1`.
-            seq2 (type): Description of parameter `seq2`.
-
-        Returns:
-            type: Description of returned object.
-
+            seq1 (str): dna sequence
+            seq2 (str): dna sequence
         """
         min_len = min(len(seq1), len(seq2))
-        max_len = max(len(seq1), len(seq2))
-        assert min_len >= self.n, "Sequence longer than tuple size"
-        counts1 = {perm: 0 for perm in self.char_permutations}
-        counts2 = {perm: 0 for perm in self.char_permutations}
+        if min_len < self.n:
+            return 0
+        else:
+            max_len = max(len(seq1), len(seq2))
+            counts1 = {perm: 0 for perm in self.char_permutations}
+            counts2 = {perm: 0 for perm in self.char_permutations}
 
-        for i in range(max_len - self.n):
-            try:
-                subseq1 = self._get_tuple(seq1, i)
-                counts1[subseq1] += 1
-            except KeyError:
-                pass
-            try:
-                subseq2 = self._get_tuple(seq2, i)
-                counts2[subseq2] += 1
-            except KeyError:
-                continue
+            for i in range(max_len - self.n):
+                try:
+                    subseq1 = self._get_tuple(seq1, i)
+                    counts1[subseq1] += 1
+                except KeyError:
+                    pass
+                try:
+                    subseq2 = self._get_tuple(seq2, i)
+                    counts2[subseq2] += 1
+                except KeyError:
+                    continue
 
-        feats1 = np.fromiter(counts1.values(), dtype=np.float32)
-        feats2 = np.fromiter(counts2.values(), dtype=np.float32)
-        return np.inner(feats1, feats2)
+            feats1 = np.fromiter(counts1.values(), dtype=np.float32)
+            feats2 = np.fromiter(counts2.values(), dtype=np.float32)
+            return np.inner(feats1, feats2)
+
+    @accepts(np.ndarray, np.ndarray)
+    def _gram_matrix(self, X1, X2):
+        min_len = min(map(len, np.hstack([X1, X2])))
+        max_len = max(map(len, np.hstack([X1, X2])))
+        if min_len < self.n:
+            return 0
+        else:
+            counts1 = {idx: {perm: 0 for perm in self.char_permutations} for idx in range(len(X1))}
+            counts2 = {idx: {perm: 0 for perm in self.char_permutations} for idx in range(len(X2))}
+            for i in range(max_len - self.n):
+                for idx, seq in enumerate(X1):
+                    try:
+                        subseq = self._get_tuple(seq, i)
+                        counts1[idx][subseq] += 1
+                    except KeyError:
+                        pass
+                for idx, seq in enumerate(X2):
+                    try:
+                        subseq = self._get_tuple(seq, i)
+                        counts2[idx][subseq] += 1
+                    except KeyError:
+                        pass
+
+            feats1 = np.array([np.fromiter(foo.values(), dtype=np.float32) for foo in counts1.values()])
+            feats2 = np.array([np.fromiter(foo.values(), dtype=np.float32) for foo in counts2.values()])
+            return np.inner(feats1, feats2)
