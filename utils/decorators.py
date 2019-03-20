@@ -1,9 +1,7 @@
 import time
-from functools import wraps
 
 
 def timeit(func):
-    @wraps(func)
     def timed(*args, **kwargs):
         ts = time.time()
         result = func(*args, **kwargs)
@@ -19,7 +17,6 @@ def timeit(func):
 
 
 def accepts(*types):
-    @wraps
     def check_accepts(func):
         assert len(types) == func.__code__.co_argcount - 1
 
@@ -34,7 +31,6 @@ def accepts(*types):
 
 
 def accepts_(*types):
-    @wraps
     def check_accepts(func):
         assert len(types) == func.__code__.co_argcount
 
@@ -49,7 +45,6 @@ def accepts_(*types):
 
 
 def fitted(func):
-    @wraps(func)
     def wrapper(self, *args, **kwargs):
         if self._fitted:
             return func(self, *args, **kwargs)
