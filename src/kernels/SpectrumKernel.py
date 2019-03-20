@@ -3,7 +3,6 @@ import sys
 import warnings
 from six import string_types
 from itertools import permutations
-from numba import vectorize
 import numpy as np
 
 base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../..")
@@ -46,14 +45,12 @@ class SpectrumKernel(Kernel):
     def char_permutations(self):
         return self._char_permutations
 
-    @accepts(string_types, int)
     def _get_tuple(self, seq, position):
         try:
             return seq[position:position + self.n]
         except IndexError:
             raise IndexError("Position out of range for tuple")
 
-    @accepts(string_types, string_types)
     def _evaluate(self, seq1, seq2):
         """
         Args:
@@ -84,8 +81,12 @@ class SpectrumKernel(Kernel):
             feats2 = np.fromiter(counts2.values(), dtype=np.float32)
             return np.inner(feats1, feats2)
 
-    @accepts(np.ndarray, np.ndarray)
     def _gram_matrix(self, X1, X2):
+        """
+        Args:
+            X1 (np.ndarray)
+            X2 (np.ndarray)
+        """
         min_len = min(map(len, np.hstack([X1, X2])))
         max_len = max(map(len, np.hstack([X1, X2])))
         if min_len < self.n:
@@ -108,5 +109,7 @@ class SpectrumKernel(Kernel):
                         pass
 
             feats1 = np.array([np.fromiter(foo.values(), dtype=np.float32) for foo in counts1.values()])
+            norms1 = np.linalg.norm(feats1, axis=1).reshape(-1, 1)
             feats2 = np.array([np.fromiter(foo.values(), dtype=np.float32) for foo in counts2.values()])
-            return np.inner(feats1, feats2)
+            norms2 = np.linalg.norm(feats2, axis=1).reshape(-1, 1)
+            return np.inner(feats1 / norms1, feats2 / norms2)
