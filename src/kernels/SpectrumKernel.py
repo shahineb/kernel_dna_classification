@@ -83,9 +83,5 @@ class SpectrumKernel(Kernel):
                 continue
 
         feats1 = np.fromiter(counts1.values(), dtype=np.float32)
-        # print(counts1)
-        # print(feats1)
         feats2 = np.fromiter(counts2.values(), dtype=np.float32)
-        # print(counts2)
-        # print(feats2)
         return np.inner(feats1, feats2)
