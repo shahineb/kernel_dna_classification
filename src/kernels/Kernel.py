@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
 
-class Kernel(object):
+class Kernel:
     __metaclass__ = ABCMeta
 
     @abstractmethod
