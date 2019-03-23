@@ -12,7 +12,7 @@ sys.path.append(base_dir)
 
 from src.kernels.Kernel import Kernel
 from utils.decorators import accepts
-import src.kernels.bin.substringkernel as c
+import src.kernels.bin.substring as c
 
 
 class SubstringKernel(Kernel):
@@ -47,28 +47,3 @@ class SubstringKernel(Kernel):
     @lru_cache(maxsize=32)
     def _evaluate(self, seq1, seq2):
         return c._evaluate(seq1, seq2, self.n, self.decay_rate)
-
-    def _gram_matrix(self, X1, X2):
-        X = [X1, X2]
-        X.sort(key=len)
-        min_X, min_len = X[0], len(X[0])
-        max_X, max_len = X[1], len(X[1])
-        gram_matrix = np.zeros((min_len, max_len), dtype=np.float32)
-
-        seqs_norms = {0: dict(), 1: dict()}
-        for i in range(min_len):
-            buffer = self._evaluate(min_X[i], min_X[i])
-            seqs_norms[0][i] = buffer
-            if min_X[i] == max_X[i]:
-                seqs_norms[1][i] = buffer
-            else:
-                seqs_norms[1][i] = self._evaluate(max_X[i], max_X[i])
-        for i in range(min_len, max_len):
-            seqs_norms[1][i] = self._evaluate(max_X[i], max_X[i])
-        for i in range(min_len):
-            for j in range(max_len):
-                if min_X[i] == max_X[j]:
-                    gram_matrix[i, j] = 1
-                else:
-                    gram_matrix[i, j] = self._evaluate(min_X[i], max_X[j]) / (seqs_norms[0][i] * seqs_norms[1][j]) ** 0.5
-        return gram_matrix
