@@ -24,6 +24,7 @@ class LocalAlignementKernel(Kernel):
         """
         Args:
             S (np.ndarray): substitution matrix
+            char2idx (dict) : mapping from char to indexes in substitution matrix
             e (float): affine gap penalty slope
             d (float): affine gap penalty intercept
             beta (float): local alignement parameter
