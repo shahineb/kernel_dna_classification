@@ -3,17 +3,25 @@ import sys
 import warnings
 from functools import lru_cache
 import numpy as np
+import pyximport
+
+pyximport.install(setup_args={"include_dirs": np.get_include()})
 
 base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../..")
 sys.path.append(base_dir)
 
 from src.kernels.Kernel import Kernel
 from utils.decorators import accepts
+import src.kernels.bin.substringkernel as c
 
 
 class SubstringKernel(Kernel):
     """Implementation of Lodhi et al. 2002
     inspired from https://github.com/timshenkao/StringKernelSVM/blob/master/stringSVM.py
+
+    Attributes:
+        n (int): n-uplet size to consider
+        decay_rate (float): decay parameter in ]0, 1[
     """
     NMAX = 2
 
@@ -32,52 +40,35 @@ class SubstringKernel(Kernel):
     def decay_rate(self):
         return self._decay_rate
 
-    @lru_cache(maxsize=64)
+    @lru_cache(maxsize=32)
     def _Kprime(self, seq1, seq2, depth):
-        if depth == 0:
-            return 1
-        elif min(len(seq1), len(seq2)) < depth:
-            return 0
-        else:
-            part_sum = 0
-            for j in range(1, len(seq2)):
-                if seq2[j] == seq1[-1]:
-                    part_sum += (self.decay_rate ** (len(seq2) - (j + 1) + 2)) * self._Kprime(seq1[:-1],
-                                                                                              seq2[:j],
-                                                                                              depth - 1)
-            result = part_sum + self.decay_rate * self._Kprime(seq1[:-1],
-                                                               seq2,
-                                                               depth)
-            return result
+        return c._Kprime(seq1, seq2, depth, self.n, self.decay_rate)
 
-    @lru_cache(maxsize=64)
+    @lru_cache(maxsize=32)
     def _evaluate(self, seq1, seq2):
-        min_len = min(len(seq1), len(seq2))
-        if min_len < self.n:
-            return 0
-        else:
-            part_sum = 0
-            for j in range(1, len(seq2)):
-                if seq2[j] == seq1[-1]:
-                    part_sum += self._Kprime(seq1[:-1], seq2[:j], self.n - 1)
-            result = self(seq1[:-1], seq2) + self.decay_rate ** 2 * part_sum
-            return result
+        return c._evaluate(seq1, seq2, self.n, self.decay_rate)
 
     def _gram_matrix(self, X1, X2):
-        len_X1 = len(X1)
-        len_X2 = len(X2)
-        gram_matrix = np.zeros((len_X1, len_X2), dtype=np.float32)
+        X = [X1, X2]
+        X.sort(key=len)
+        min_X, min_len = X[0], len(X[0])
+        max_X, max_len = X[1], len(X[1])
+        gram_matrix = np.zeros((min_len, max_len), dtype=np.float32)
 
-        seqs_norms = {1: dict(), 2: dict()}
-        for i in range(len_X1):
-            seqs_norms[1][i] = self._evaluate(X1[i], X1[i])
-        for i in range(len_X2):
-            seqs_norms[2][i] = self._evaluate(X2[i], X2[i])
-
-        for i in range(len_X1):
-            for j in range(len_X2):
-                if X1[i] == X2[j]:
+        seqs_norms = {0: dict(), 1: dict()}
+        for i in range(min_len):
+            buffer = self._evaluate(min_X[i], min_X[i])
+            seqs_norms[0][i] = buffer
+            if min_X[i] == max_X[i]:
+                seqs_norms[1][i] = buffer
+            else:
+                seqs_norms[1][i] = self._evaluate(max_X[i], max_X[i])
+        for i in range(min_len, max_len):
+            seqs_norms[1][i] = self._evaluate(max_X[i], max_X[i])
+        for i in range(min_len):
+            for j in range(max_len):
+                if min_X[i] == max_X[j]:
                     gram_matrix[i, j] = 1
                 else:
-                    gram_matrix[i, j] = self._evaluate(X1[i], X2[j]) / (seqs_norms[1][i] * seqs_norms[2][i]) ** 0.5
+                    gram_matrix[i, j] = self._evaluate(min_X[i], max_X[j]) / (seqs_norms[0][i] * seqs_norms[1][j]) ** 0.5
         return gram_matrix
