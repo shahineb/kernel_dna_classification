@@ -3,6 +3,7 @@ import sys
 import warnings
 from functools import lru_cache
 import numpy as np
+from numba import jit
 
 base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../..")
 sys.path.append(base_dir)

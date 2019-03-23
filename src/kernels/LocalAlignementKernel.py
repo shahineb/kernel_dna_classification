@@ -2,7 +2,6 @@ import os
 import sys
 import numpy as np
 from tqdm import tqdm
-from numba import jit
 
 base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../..")
 sys.path.append(base_dir)
@@ -91,4 +90,5 @@ class LocalAlignementKernel(Kernel):
                     gram_matrix[i, j] = 1
                 else:
                     gram_matrix[i, j] = self._evaluate(X1[i], X2[j]) / (seqs_norms[1][i] * seqs_norms[2][i]) ** 0.5
+        
         return gram_matrix
