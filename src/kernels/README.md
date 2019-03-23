@@ -25,10 +25,10 @@ It's based on substring occurences, with length and spacing penalization.
 (Vert et al. 2004)
 
 `LocalAlignementKernel` is initialized by :
-    - `S` : substitution matrix, i.e. cost/reward of substituting a nucleotide by another as numpy array
-    - `char2idx` : mapping from nucleotide to matching index in `S`
-    - `e` : affine gap penalty slope
-    - `d` : affine gap penalty intercept
-    - `beta` : local alignement parameter
+  - `S` : substitution matrix, i.e. cost/reward of substituting a nucleotide by another as numpy array
+  - `char2idx` : mapping from nucleotide to matching index in `S`
+  - `e` : affine gap penalty slope
+  - `d` : affine gap penalty intercept
+  - `beta` : local alignement parameter
 
 Based on the Smith Waterman score, this kernel tries to quantify alignement performance between 2 DNA sequences
