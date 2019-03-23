@@ -40,10 +40,10 @@ class SubstringKernel(Kernel):
     def decay_rate(self):
         return self._decay_rate
 
-    @lru_cache(maxsize=32)
+    @lru_cache(maxsize=64)
     def _Kprime(self, seq1, seq2, depth):
         return c._Kprime(seq1, seq2, depth, self.n, self.decay_rate)
 
-    @lru_cache(maxsize=32)
+    @lru_cache(maxsize=64)
     def _evaluate(self, seq1, seq2):
         return c._evaluate(seq1, seq2, self.n, self.decay_rate)
