@@ -73,15 +73,18 @@ class Kernel:
                  1: {i: value for (i, value) in enumerate(max_norms)}}
 
         # Compute all normalized inner products K(x_i, x_j) / ( K(x_i, x_i) *  K(x_j, x_j)) ** 0.5
-        for i in tqdm(range(min_len), disable=self.verbose):
+        def helper(i):
+            gram_row_i = np.zeros(max_len)
             for j in range(i, max_len):
                 if min_X[i] == max_X[j]:
-                    gram_matrix[i, j] = 1
+                    gram_row_i[j] = 1
                 else:
-                    buffer = self._evaluate(min_X[i], max_X[j]) / np.sqrt(norms[0][i] * norms[1][j])
-                    gram_matrix[i, j] = buffer
-                    if j < min_len:
-                        gram_matrix[j, i] = buffer
+                    gram_row_i[j] = self._evaluate(min_X[i], max_X[j]) / np.sqrt(norms[0][i] * norms[1][j])
+            return gram_row_i
+
+        gram_rows = Parallel(n_jobs=config.n_jobs)(delayed(helper)(i) for i in tqdm(range(min_len), disable=self.verbose))
+        gram_matrix = np.stack(gram_rows)
+        gram_matrix[:, :min_len] = gram_matrix[:, :min_len] + gram_matrix.T[:min_len] - np.diag(gram_matrix) * np.eye(min_len)
 
         # Return matrix in correct orientation
         if min_len == len(X2):
