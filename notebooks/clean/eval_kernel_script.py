@@ -16,5 +16,5 @@ X = loader.load("Xtr0.csv", as_array=True)
 kernel = SubstringKernel(n=2, decay_rate=0.3)
 
 
-gram_matrix = kernel(X[:3], X[:3])
+gram_matrix = kernel(X, X)
 np.savetxt(X=gram_matrix, fname="substring_n2_decay_rate0.3_Xtr0.csv")

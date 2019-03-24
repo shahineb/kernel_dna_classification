@@ -6,8 +6,8 @@ from src.classifiers.Classifier import Classifier
 
 class KernelLogisticRegression(Classifier):
 
-    def __init__(self, max_iter=1000, tol=1e-3, lambda_reg=1, verbose=True):
-        super(KernelLogisticRegression, self).__init__(verbose)
+    def __init__(self, max_iter=1000, tol=1e-4, lambda_reg=1e-1, verbose=True):
+        super(KernelLogisticRegression, self).__init__(verbose=verbose)
         self.max_iter = max_iter
         self.tol = tol
         self.lambda_reg = lambda_reg
@@ -58,7 +58,3 @@ class KernelLogisticRegression(Classifier):
 
     def predict_prob(self, X):
         return self.sigmoid(np.dot(X, self.alpha))
-
-
-
-

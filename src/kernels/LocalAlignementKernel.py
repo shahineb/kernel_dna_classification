@@ -80,7 +80,10 @@ class LocalAlignementKernel(Kernel):
 
     def _gram_matrix(self, X1, X2):
         gram_matrix = super(LocalAlignementKernel, self)._gram_matrix(X1, X2)
-        gram_matrix = np.log(gram_matrix) / self.beta
-        min_eigen_value = np.min(np.linalg.eigvals(gram_matrix))
-        gram_matrix = gram_matrix - min(0, min_eigen_value)
+        try:
+            buffer = np.log(gram_matrix) / self.beta
+            min_eigen_value = np.min(np.linalg.eigvals(buffer))
+            gram_matrix = buffer - min(0, min_eigen_value)
+        except np.linalg.LinAlgError:
+            pass
         return gram_matrix
