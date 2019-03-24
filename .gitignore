@@ -105,6 +105,7 @@ venv.bak/
 
 # datasets
 data/*
+!data/submissions
 !data/.gitkeep
 
 # OS generated files
