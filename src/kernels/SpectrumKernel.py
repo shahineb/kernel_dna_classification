@@ -18,13 +18,14 @@ class SpectrumKernel(Kernel):
     """
     NMAX = 6
 
-    @accepts(int, string_types)
-    def __init__(self, n, charset):
+    @accepts(int, string_types, int)
+    def __init__(self, n, charset, verbose=0):
         """
         Args:
             n (int): n-uplet size to consider
             charset (str): charset for preindexation (typically "ATCG")
         """
+        super(SpectrumKernel, self).__init__(verbose)
         self._n = n
         if self._n > SpectrumKernel.NMAX:
             warnings.warn(f"Becomes computationally expensive when n > {SpectrumKernel.NMAX}")

@@ -25,8 +25,9 @@ class SubstringKernel(Kernel):
     """
     NMAX = 2
 
-    @accepts(int, float)
-    def __init__(self, n, decay_rate):
+    @accepts(int, float, int)
+    def __init__(self, n, decay_rate, verbose=1):
+        super(SubstringKernel, self).__init__(verbose)
         self._n = n
         if self._n > SubstringKernel.NMAX:
             warnings.warn(f"Becomes computationally expensive when n > {SubstringKernel.NMAX}")

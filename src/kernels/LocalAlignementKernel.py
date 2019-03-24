@@ -19,8 +19,8 @@ class LocalAlignementKernel(Kernel):
     when tackling diagonal dominance issue with log
     """
 
-    @accepts(np.ndarray, dict, float, float, float)
-    def __init__(self, S, char2idx, e, d, beta):
+    @accepts(np.ndarray, dict, float, float, float, int)
+    def __init__(self, S, char2idx, e, d, beta, verbose=1):
         """
         Args:
             S (np.ndarray): substitution matrix
@@ -29,6 +29,7 @@ class LocalAlignementKernel(Kernel):
             d (float): affine gap penalty intercept
             beta (float): local alignement parameter
         """
+        super(LocalAlignementKernel, self).__init__(verbose)
         self._S = S
         self._e = e
         self._d = d
