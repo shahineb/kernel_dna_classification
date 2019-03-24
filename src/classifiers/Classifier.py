@@ -76,9 +76,4 @@ class Classifier:
     def predict(self, X, threshold=0.5):
         y_pred = np.array(self.predict_prob(X) >= threshold, dtype=int)
         y_pred[y_pred == 0] = -1
-<<<<<<< .merge_file_L3vk3p
         return np.squeeze(y_pred)
-
-=======
-        return y_pred
->>>>>>> .merge_file_jdcbpO
