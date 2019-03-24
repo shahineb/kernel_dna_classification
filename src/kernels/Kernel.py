@@ -11,6 +11,7 @@ sys.path.append(base_dir)
 
 import config
 
+
 class Kernel:
     """General abstract class for Kernel
     """
