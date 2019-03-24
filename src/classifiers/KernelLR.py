@@ -1,16 +1,16 @@
 import numpy as np
-
+import scipy.linalg ### ne pas enlever
+import scipy as sp
 from src.classifiers.Classifier import Classifier
 
 
 class KernelLogisticRegression(Classifier):
 
-    def __init__(self, max_iter=1000, tol=1e-4, lambda_reg=1e-1, verbose=True):
+    def __init__(self, max_iter=1000, tol=1e-3, lambda_reg=1, verbose=True):
         super(KernelLogisticRegression, self).__init__(verbose)
         self.max_iter = max_iter
         self.tol = tol
         self.lambda_reg = lambda_reg
-        self.verbose = verbose
 
     @staticmethod
     def sigmoid(z):
@@ -39,7 +39,7 @@ class KernelLogisticRegression(Classifier):
         return alpha
 
     def fit(self, K_x, y):
-
+        y = np.expand_dims(y, axis=-1)
         # weights initialization
         self.alpha = np.random.randn(K_x.shape[1], 1)
 
@@ -51,7 +51,7 @@ class KernelLogisticRegression(Classifier):
             self.alpha = self._update_irls_alpha(K_x, W, z)
 
             if self._verbose:
-                print(f'Criterion: {np.linalg.norm(self.alpha - old_alpha)} \t')
+                print(f'Alpha loss: {np.linalg.norm(self.alpha - old_alpha)} \t')
             if np.linalg.norm(self.alpha - old_alpha) < self.tol:
                 print('Convergence!')
                 break

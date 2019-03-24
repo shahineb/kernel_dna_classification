@@ -1,4 +1,4 @@
-from KernelLR import KernelLogisticRegression
+from src.classifiers.KernelLR import KernelLogisticRegression
 
 
 choices = {'kernel-lr': KernelLogisticRegression,

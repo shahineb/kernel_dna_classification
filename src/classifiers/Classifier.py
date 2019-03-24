@@ -26,10 +26,14 @@ class Classifier:
         return self._verbose
 
     @staticmethod
-    def evaluate(y_true, y_pred, val=True):
-        accuracy = np.mean(np.array(y_true == y_pred, dtype=int))
+    def evaluate(y_true, y_pred, val=False):
+        #import pdb; pdb.set_trace()
+        array = np.array(y_true == y_pred, dtype=int)
+        array[array == -1] = 0
+        accuracy = np.mean(array)
         set = 'Validation' if val else 'Training'
-        print('Accuracy on the {} set: {:.4f}'.format(set, accuracy))
+        print('Accuracy on the {} set: {:.2f}'.format(set, accuracy))
+
 
     @abstractmethod
     def fit(self, x, y):
@@ -53,5 +57,5 @@ class Classifier:
     def predict(self, X, threshold=0.5):
         y_pred = np.array(self.predict_prob(X) >= threshold, dtype=int)
         y_pred[y_pred == 0] = -1
-        return y_pred
+        return np.squeeze(y_pred)
 

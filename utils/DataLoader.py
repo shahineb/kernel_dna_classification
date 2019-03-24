@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import pandas as pd
 
 base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
