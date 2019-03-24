@@ -52,7 +52,6 @@ class Classifier:
         set = 'Validation' if val else 'Training'
         print('Accuracy on the {} set: {:.2f}'.format(set, accuracy))
 
-
     @abstractmethod
     def fit(self, x, y, *args, **kwargs):
         """Evaluates kernel on samples x and y
