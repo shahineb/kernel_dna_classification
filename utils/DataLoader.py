@@ -19,9 +19,12 @@ class DataLoader:
         return self._data_dir
 
     def load(self, dataset_id, as_array=False):
-        # TODO : efficient load by id only and add label option
-        df = pd.read_csv(os.path.join(self.data_dir, dataset_id), index_col=0)
-        return df.values.squeeze() if as_array else df
+        path = os.path.join(self.data_dir, dataset_id)
+        if as_array:
+            output = np.loadtxt(path)
+        else:
+            output = pd.read_csv(path, index_col=0)
+        return output
 
     @staticmethod
     def train_val_split(x, y, val_size=0.33, random_state=42):
