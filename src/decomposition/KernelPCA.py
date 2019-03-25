@@ -69,10 +69,12 @@ class KernelPCA:
 
         # Compute explained variance
         _, S, __ = np.linalg.svd(gram_matrix, full_matrices=False)
-        self._explained_variance = (S ** 2) / (n - 1)
-        total_var = self._explained_variance.sum()
+        _explained_variance = (S ** 2) / (n - 1)
+        self._explained_variance = _explained_variance[:self.n_components]
+        total_var = _explained_variance.sum()
         self._explained_variance_ratio = self._explained_variance / total_var
-        self._singular_values = S.copy()
+        _singular_values = S.copy()
+        self._singular_values = _singular_values[:self.n_components]
 
         # Mark as fitted
         self._fitted = True

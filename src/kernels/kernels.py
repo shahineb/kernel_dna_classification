@@ -1,6 +1,7 @@
 from src.kernels.SpectrumKernel import SpectrumKernel
 from src.kernels.SubstringKernel import SubstringKernel
 from src.kernels.LocalAlignementKernel import LocalAlignementKernel
+from src.kernels.GaussianKernel import GaussianKernel
 
 n = 5
 charset = 'ACGT'

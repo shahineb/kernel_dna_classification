@@ -14,7 +14,7 @@ class GaussianKernel(Kernel):
     """Implementation of Gaussian kernel
     """
 
-    @accepts(float)
+    @accepts(float, int)
     def __init__(self, std=1.0, verbose=1):
         """
         Args:
