@@ -10,6 +10,7 @@ sys.path.append(base_dir)
 
 from src.kernels.Kernel import Kernel
 from utils.decorators import accepts
+import src.kernels.bin.localalignement as c
 
 
 class LocalAlignementKernel(Kernel):
@@ -19,8 +20,17 @@ class LocalAlignementKernel(Kernel):
     when tackling diagonal dominance issue with log
     """
 
+    BLOSUM62 = np.array([[4., 0., 0., 0.],
+                         [0., 5., -1., -2.],
+                         [0., -1., 9., -3.],
+                         [0., -2., -3., 6.]], dtype=np.float64)
+    CHAR2IDX = {'A': 0, 'T': 1, 'C': 2, 'G': 3}
+
     @accepts(np.ndarray, dict, float, float, float, int)
-    def __init__(self, S, char2idx, e, d, beta, verbose=1):
+    def __init__(self,
+                 S=BLOSUM62,
+                 char2idx=CHAR2IDX,
+                 e=11., d=1., beta=0.5, verbose=1):
         """
         Args:
             S (np.ndarray): substitution matrix
@@ -62,11 +72,11 @@ class LocalAlignementKernel(Kernel):
         min_seq, min_len = seqs[0], len(seqs[0]) + 1
         max_seq, max_len = seqs[1], len(seqs[1]) + 1
 
-        M = np.zeros((min_len, max_len))
-        X = np.zeros((min_len, max_len))
-        Y = np.zeros((min_len, max_len))
-        X2 = np.zeros((min_len, max_len))
-        Y2 = np.zeros((min_len, max_len))
+        M = np.zeros((min_len, max_len), dtype=np.float128)
+        X = np.zeros((min_len, max_len), dtype=np.float128)
+        Y = np.zeros((min_len, max_len), dtype=np.float128)
+        X2 = np.zeros((min_len, max_len), dtype=np.float128)
+        Y2 = np.zeros((min_len, max_len), dtype=np.float128)
         for i in range(1, min_len):
             for j in range(1, max_len):
                 M[i, j] = np.exp(self.beta * (self.S[self.char2idx[min_seq[i - 1]], self.char2idx[max_seq[j - 1]]]))\
@@ -83,7 +93,7 @@ class LocalAlignementKernel(Kernel):
         try:
             buffer = np.log(gram_matrix) / self.beta
             min_eigen_value = np.min(np.linalg.eigvals(buffer))
-            gram_matrix = buffer - min(0, min_eigen_value)
+            gram_matrix = buffer - (min(0, min_eigen_value) - 1) * np.eye(len(buffer))
         except np.linalg.LinAlgError:
             pass
         return gram_matrix

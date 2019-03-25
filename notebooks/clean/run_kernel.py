@@ -18,21 +18,11 @@ Xte1 = loader.get_test(k=1)
 Xte2 = loader.get_test(k=2)
 
 
-S = np.array([[3, -1, -1, -1],
-              [-1, 8, -4, -2],
-              [-1, -4, 5, -3],
-              [-1, -2, -3, 4]], dtype=np.float64)
-char2idx = {'A': 0, 'C': 1, 'G': 2, 'T': 3}
-beta = 0.01
-e = 11.
-d = 1.
+kernel = LocalAlignementKernel()
 
-kernel = LocalAlignementKernel(S=S,
-                               char2idx=char2idx,
-                               e=e,
-                               d=d,
-                               beta=beta)
 
+gram_matrix = kernel(X0[:15], X0[:15])
+np.savetxt(X=gram_matrix, fname="foo.csv")
 
 gram_matrix = kernel(X0, X0)
 np.savetxt(X=gram_matrix, fname="localalignement_00.csv")

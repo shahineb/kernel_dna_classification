@@ -10,7 +10,6 @@ from src.kernels.Kernel import Kernel
 from utils.decorators import accepts
 
 
-
 class GaussianKernel(Kernel):
     """Implementation of Gaussian kernel
     """
@@ -23,7 +22,7 @@ class GaussianKernel(Kernel):
         """
         super(GaussianKernel, self).__init__(verbose)
         self._std = std
-        
+
     @property
     def std(self):
         return self._std
@@ -34,7 +33,7 @@ class GaussianKernel(Kernel):
             x1 (array): vector
             x2 (array): vector
         """
-        return np.exp( -(x1-x2)**2 / (2*self._std) )
+        return np.exp(-(x1 - x2)**2 / (2 * self._std))
 
     def _gram_matrix(self, X1, X2):
         """
