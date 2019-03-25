@@ -10,7 +10,6 @@ sys.path.append(base_dir)
 
 from src.kernels.Kernel import Kernel
 from utils.decorators import accepts
-import src.kernels.bin.localalignement as c
 
 
 class LocalAlignementKernel(Kernel):
@@ -88,12 +87,12 @@ class LocalAlignementKernel(Kernel):
                 Y2[i, j] = M[i, j - 1] + X2[i, j - 1] + Y2[i, j - 1]
         return 1 + X2[-1, -1] + Y2[-1, -1] + M[-1, -1]
 
-    def _gram_matrix(self, X1, X2):
-        gram_matrix = super(LocalAlignementKernel, self)._gram_matrix(X1, X2)
+    def _pairwise(self, X1, X2):
+        pairwise_matrix = super(LocalAlignementKernel, self)._pairwise(X1, X2)
         try:
-            buffer = np.log(gram_matrix) / self.beta
+            buffer = np.log(pairwise_matrix) / self.beta
             min_eigen_value = np.min(np.linalg.eigvals(buffer))
-            gram_matrix = buffer - (min(0, min_eigen_value) - 1) * np.eye(len(buffer))
+            pairwise_matrix = buffer - (min(0, min_eigen_value) - 1) * np.eye(len(buffer))
         except np.linalg.LinAlgError:
             pass
-        return gram_matrix
+        return pairwise_matrix
