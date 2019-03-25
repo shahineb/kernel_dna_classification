@@ -11,6 +11,15 @@ See [wiki on kernel manipulation](https://github.com/shahineb/kernel_challenge/w
 
 It's based on the number of occurences of each n-uple made out of the provided set of chars. The proposed implementation presents a preindexed version of this kernel, making it hence very computationally efficient. However, we recommend not to use a tuple lenght greater than 7.
 
+## Mismatch Kernel
+(Leslie et al. 2003)
+
+`MismatchKernel` is initialized by :
+  - `n` : tuple length to be considered
+  - `charset` : string with all chars to be considered (e.g "ATCG")
+  - `k` : maxmimum number of mismatch allowed
+
+It is very similar to the Spectrum Kernel expect for the fact that for a given sequence, we count occurences of each n-uples along with their k-neighbors. For example, with n=3 and k=1, if we parse sequence `'AAA'`, it would also count for `{'AAC', 'AAG', 'AAT', 'ACA', 'AGA', 'ATA', 'CAA', 'GAA', 'TAA'}`.
 
 ## Substring kernel
 (Lodhi et al. 2002)

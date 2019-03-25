@@ -35,7 +35,7 @@ class GaussianKernel(Kernel):
         """
         return np.exp(-(x1 - x2)**2 / (2 * self._std))
 
-    def _gram_matrix(self, X1, X2):
+    def _pairwise(self, X1, X2):
         """
         Args:
             X1 (np.ndarray)

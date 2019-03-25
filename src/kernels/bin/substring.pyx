@@ -48,14 +48,14 @@ cpdef np.ndarray[np.float64_t, ndim=2] _empty_gram(int n, int p):
     return gram_matrix
 
 
-cpdef np.ndarray[np.float64_t, ndim=2] _gram_matrix(np.ndarray X1, np.ndarray X2, int n, float decay_rate):
+cpdef np.ndarray[np.float64_t, ndim=2] _pairwise(np.ndarray X1, np.ndarray X2, int n, float decay_rate):
     cdef list X = [X1, X2]
     X.sort(key=len)
     cdef np.ndarray min_X = X[0]
     cdef np.ndarray max_X = X[1]
     cdef int min_len = len(X[0])
     cdef int max_len =  len(X[1])
-    cdef np.ndarray[np.float64_t, ndim=2] gram_matrix = _empty_gram(min_len, max_len)
+    cdef np.ndarray[np.float64_t, ndim=2] pairwise_matrix = _empty_gram(min_len, max_len)
     cdef float buffer
     seqs_norms = {0: dict(), 1: dict()}
 
@@ -72,7 +72,7 @@ cpdef np.ndarray[np.float64_t, ndim=2] _gram_matrix(np.ndarray X1, np.ndarray X2
     for i in range(min_len):
         for j in range(max_len):
             if min_X[i] == max_X[j]:
-                gram_matrix[i, j] = 1
+                pairwise_matrix[i, j] = 1
             else:
-                gram_matrix[i, j] = _evaluate(min_X[i], max_X[j], n, decay_rate) / (seqs_norms[0][i] * seqs_norms[1][j]) ** 0.5
-    return gram_matrix
+                pairwise_matrix[i, j] = _evaluate(min_X[i], max_X[j], n, decay_rate) / (seqs_norms[0][i] * seqs_norms[1][j]) ** 0.5
+    return pairwise_matrix
