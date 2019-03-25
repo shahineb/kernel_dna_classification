@@ -30,9 +30,9 @@ class SpectrumKernel(Kernel):
         if self._n > SpectrumKernel.NMAX:
             warnings.warn(f"Becomes computationally expensive when n > {SpectrumKernel.NMAX}")
         self._charset = charset
-        permutation_seed = (2 + max(n - len(charset), 0)) * charset
+        permutation_seed = n * charset
         helper = lambda x: "".join(x)
-        self._char_permutations = list(map(helper, set(permutations(permutation_seed, self._n))))
+        self._patterns = list(map(helper, set(permutations(permutation_seed, self._n))))
 
     @property
     def n(self):
@@ -43,14 +43,18 @@ class SpectrumKernel(Kernel):
         return self._charset
 
     @property
-    def char_permutations(self):
-        return self._char_permutations
+    def patterns(self):
+        return self._patterns
 
     def _get_tuple(self, seq, position):
         try:
             return seq[position:position + self.n]
         except IndexError:
             raise IndexError("Position out of range for tuple")
+
+    def _count_pattern(self, pattern, count_dict):
+        count_dict[pattern] += 1
+        return count_dict
 
     def _evaluate(self, seq1, seq2):
         """
@@ -63,18 +67,18 @@ class SpectrumKernel(Kernel):
             return 0
         else:
             max_len = max(len(seq1), len(seq2))
-            counts1 = {perm: 0 for perm in self.char_permutations}
-            counts2 = {perm: 0 for perm in self.char_permutations}
+            counts1 = {pattern: 0 for pattern in self.patterns}
+            counts2 = {pattern: 0 for pattern in self.patterns}
 
             for i in range(max_len - self.n):
                 try:
                     subseq1 = self._get_tuple(seq1, i)
-                    counts1[subseq1] += 1
+                    counts1 = self._count_pattern(subseq1, counts1)
                 except KeyError:
                     pass
                 try:
                     subseq2 = self._get_tuple(seq2, i)
-                    counts2[subseq2] += 1
+                    counts2 = self._count_pattern(subseq2, counts2)
                 except KeyError:
                     continue
 
@@ -82,7 +86,7 @@ class SpectrumKernel(Kernel):
             feats2 = np.fromiter(counts2.values(), dtype=np.float32)
             return np.inner(feats1, feats2)
 
-    def _gram_matrix(self, X1, X2):
+    def _pairwise(self, X1, X2):
         """
         Args:
             X1 (np.ndarray)
@@ -93,19 +97,19 @@ class SpectrumKernel(Kernel):
         if min_len < self.n:
             return 0
         else:
-            counts1 = {idx: {perm: 0 for perm in self.char_permutations} for idx in range(len(X1))}
-            counts2 = {idx: {perm: 0 for perm in self.char_permutations} for idx in range(len(X2))}
+            counts1 = {idx: {perm: 0 for perm in self.patterns} for idx in range(len(X1))}
+            counts2 = {idx: {perm: 0 for perm in self.patterns} for idx in range(len(X2))}
             for i in range(max_len - self.n):
                 for idx, seq in enumerate(X1):
                     try:
                         subseq = self._get_tuple(seq, i)
-                        counts1[idx][subseq] += 1
+                        counts1[idx] = self._count_pattern(subseq, counts1[idx])
                     except KeyError:
                         pass
                 for idx, seq in enumerate(X2):
                     try:
                         subseq = self._get_tuple(seq, i)
-                        counts2[idx][subseq] += 1
+                        counts2[idx] = self._count_pattern(subseq, counts2[idx])
                     except KeyError:
                         pass
 
