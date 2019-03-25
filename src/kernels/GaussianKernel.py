@@ -1,3 +1,5 @@
+import os
+import sys
 import numpy as np
 from scipy.spatial.distance import cdist
 
@@ -5,7 +7,7 @@ base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../..")
 sys.path.append(base_dir)
 
 from src.kernels.Kernel import Kernel
-
+from utils.decorators import accepts
 
 
 
@@ -13,8 +15,8 @@ class GaussianKernel(Kernel):
     """Implementation of Gaussian kernel
     """
 
-    @accepts(float)
-    def __init__(self, std=1.0):
+    @accepts(float, int)
+    def __init__(self, std=1.0, verbose=0):
         """
         Args:
             std (float): standard deviation
