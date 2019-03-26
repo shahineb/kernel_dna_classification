@@ -14,7 +14,7 @@ class WDKernel(Kernel):
     """
 
     @accepts(int, int)
-    def __init__(self, n, verbose=0):
+    def __init__(self, n, verbose=1):
         super(WDKernel, self).__init__(verbose)
         self._n = n
 
@@ -35,7 +35,7 @@ class WDKernel(Kernel):
 
         Args:
             char (str): new character for buffer
-            buffer (np.ndarray): record buffer of parsed mers for length in {1, ..., n}
+            buffer (np.ndarray): (self.n, )record buffer of parsed mers for length in {1, ..., n}
         """
         for i in range(self.n):
             if len(buffer[i]) == i + 1:
@@ -44,7 +44,7 @@ class WDKernel(Kernel):
                 buffer[i] = buffer[i] + char
         return buffer
 
-    def _update_buffer_fromto(self, char, buffer):
+    def _update_buffer(self, char, buffer):
         """Updates buffer through parsing
 
         Args:
@@ -67,9 +67,9 @@ class WDKernel(Kernel):
         for i in range(self.n):
             buffer1 = self._fill_buffer(seq1[i], buffer1)
             buffer2 = self._fill_buffer(seq2[i], buffer2)
-            cum_sum += np.inner(weights[:i], buffer1[:i] == buffer2[:i])
+            cum_sum += np.inner(weights[:i + 1], buffer1[:i + 1] == buffer2[:i + 1])
         for i in range(self.n, seq_size):
-            buffer1 = self._update_buffer_fromto(seq1[i], buffer1)
-            buffer2 = self._update_buffer_fromto(seq2[i], buffer2)
+            buffer1 = self._update_buffer(seq1[i], buffer1)
+            buffer2 = self._update_buffer(seq2[i], buffer2)
             cum_sum += np.inner(weights, buffer1 == buffer2)
         return cum_sum

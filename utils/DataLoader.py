@@ -30,7 +30,7 @@ class DataLoader:
         idx = rng.permutation(length)
         x = x[idx]
         y = y[idx]
-        milestone = int(length*(1-val_size))
+        milestone = int(length * (1 - val_size))
         x_train, y_train = x[:milestone], y[:milestone]
         x_val, y_val = x[milestone:], y[milestone:]
         return x_train, x_val, y_train, y_val

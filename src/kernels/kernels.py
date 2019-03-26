@@ -4,6 +4,7 @@ from src.kernels.LocalAlignementKernel import LocalAlignementKernel
 from src.kernels.GaussianKernel import GaussianKernel
 from src.kernels.MismatchKernel import MismatchKernel
 from src.kernels.WeightedDegreeKernel import WDKernel
+from src.kernels.ShiftWeightedDegreeKernel import ShiftWDKernel
 
 n = 5
 charset = 'ACGT'

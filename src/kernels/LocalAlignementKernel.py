@@ -86,13 +86,3 @@ class LocalAlignementKernel(Kernel):
                 X2[i, j] = M[i - 1, j] + X2[i - 1, j]
                 Y2[i, j] = M[i, j - 1] + X2[i, j - 1] + Y2[i, j - 1]
         return 1 + X2[-1, -1] + Y2[-1, -1] + M[-1, -1]
-
-    def _pairwise(self, X1, X2):
-        pairwise_matrix = super(LocalAlignementKernel, self)._pairwise(X1, X2)
-        try:
-            buffer = np.log(pairwise_matrix) / self.beta
-            min_eigen_value = np.min(np.linalg.eigvals(buffer))
-            pairwise_matrix = buffer - (min(0, min_eigen_value) - 1) * np.eye(len(buffer))
-        except np.linalg.LinAlgError:
-            pass
-        return pairwise_matrix
