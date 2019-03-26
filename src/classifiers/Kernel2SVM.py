@@ -10,7 +10,7 @@ from src.classifiers.Classifier import Classifier
 from utils.decorators import fitted
 
 
-class KernelSVM(Classifier):
+class Kernel2SVM(Classifier):
     """Implementation of Kernel SVM based on dual formulation
 
     Args:
@@ -21,16 +21,16 @@ class KernelSVM(Classifier):
         verbose (int): in {0, 1}
     """
 
-    def __init__(self, kernel, C=1.0, support_vec_tol=1e-3, verbose=0):
-        super(KernelSVM, self).__init__(kernel=kernel, verbose=verbose)
-        self._C = C
+    def __init__(self, kernel, lbda=1.0, support_vec_tol=1e-3, verbose=0):
+        super(Kernel2SVM, self).__init__(kernel=kernel, verbose=verbose)
+        self._lbda = lbda
         self._support_vec_tol = support_vec_tol
         self._alpha = None
         self._support_vectors = None
 
     @property
-    def C(self):
-        return self._C
+    def lbda(self):
+        return self._lbda
 
     @property
     def support_vec_tol(self):
@@ -53,20 +53,20 @@ class KernelSVM(Classifier):
             K = X.astype(np.double)
         else:
             K = self.kernel(X, X).astype(np.double)
-        y = KernelSVM.format_binary_labels(y).astype(np.double)
+        y = Kernel2SVM.format_binary_labels(y).astype(np.double)
 
         # Setup cvxopt QP args
         n = len(K)
-        Q = cvxopt.matrix(K)
+        Q = cvxopt.matrix(K + n*self._lbda*np.eye(n))
         p = -cvxopt.matrix(y)
-        G = cvxopt.matrix(np.vstack([np.diag(-y), np.diag(y)]))
-        h = cvxopt.matrix(np.hstack([np.zeros(n), self.C * np.ones(n)]))
+        G = cvxopt.matrix(np.diag(-y))
+        h = cvxopt.matrix(np.zeros(n))
         cvxopt.solvers.options['show_progress'] = self.verbose
 
         # Solve problem
         sol = cvxopt.solvers.qp(Q, p, G, h)
         self._alpha = np.array(sol['x']).ravel()
-        self._support_vectors = np.where(np.abs(self._alpha) > self._support_vec_tol * self.C)[0]
+        self._support_vectors = np.where(np.abs(self._alpha) > self._support_vec_tol*self._lbda)[0]
         self._fitted = True
 
     def predict_prob(self, X):
