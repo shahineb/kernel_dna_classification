@@ -21,7 +21,7 @@ class KernelSVM(Classifier):
         verbose (int): in {0, 1}
     """
 
-    def __init__(self, kernel, C=1.0, support_vec_tol=1e-3, verbose=0):
+    def __init__(self, kernel=None, C=1.0, support_vec_tol=1e-3, verbose=0):
         super(KernelSVM, self).__init__(kernel=kernel, verbose=verbose)
         self._C = C
         self._support_vec_tol = support_vec_tol
@@ -46,13 +46,13 @@ class KernelSVM(Classifier):
     def support_vectors(self):
         return self._support_vectors
 
-    def fit(self, X, y, precomputed=True):
+    def fit(self, X, y):
         # Kernel matrix and labels formatting
         self._Xtr = X
-        if precomputed:
-            K = X.astype(np.double)
-        else:
+        if self.kernel:
             K = self.kernel(X, X).astype(np.double)
+        else:
+            K = X.astype(np.double)
         y = KernelSVM.format_binary_labels(y).astype(np.double)
 
         # Setup cvxopt QP args
@@ -72,10 +72,10 @@ class KernelSVM(Classifier):
     def predict_prob(self, X):
         raise RuntimeError("No probability prediction for SVM")
 
-    def predict(self, X, precomputed=False):
-        if precomputed:
-            foo = X.astype(np.double)[self.support_vectors]
-        else:
+    def predict(self, X):
+        if self.kernel:
             foo = self.kernel(self.Xtr[self.support_vectors], X)
+        else:
+            foo = X[self.support_vectors]
         y_pred = np.sign(self.alpha[self.support_vectors] @ foo)
         return y_pred
