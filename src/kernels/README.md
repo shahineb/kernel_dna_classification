@@ -6,7 +6,7 @@ See [wiki on kernel manipulation](https://github.com/shahineb/kernel_challenge/w
 (Leslie et al. 2002)
 
 `SpectrumKernel` is initialized by :
-  - `n` : tuple length to be considered
+  - `n` : mer length to be considered
   - `charset` : string with all chars to be considered (e.g "ATCG")
 
 It's based on the number of occurences of each n-uple made out of the provided set of chars. The proposed implementation presents a preindexed version of this kernel, making it hence very computationally efficient. However, we recommend not to use a tuple lenght greater than 7.
@@ -15,11 +15,19 @@ It's based on the number of occurences of each n-uple made out of the provided s
 (Leslie et al. 2003)
 
 `MismatchKernel` is initialized by :
-  - `n` : tuple length to be considered
+  - `n` : mer length to be considered
   - `charset` : string with all chars to be considered (e.g "ATCG")
   - `k` : maxmimum number of mismatch allowed
 
 It is very similar to the Spectrum Kernel expect for the fact that for a given sequence, we count occurences of each n-uples along with their k-neighbors. For example, with n=3 and k=1, if we parse sequence `'AAA'`, it would also count for `{'AAC', 'AAG', 'AAT', 'ACA', 'AGA', 'ATA', 'CAA', 'GAA', 'TAA'}`.
+
+## Weighted Degree Kernel
+(Ratsch and Sonnenburg, 2004)
+
+`WDKernel` is initialized by:
+  - `n` : maximal mer length to be considered
+
+Compares co-occurences of k-mers at corresponding position in sequences. Implementation is performed in a linear time by parsing characters successively and keeping track of last k-mers parsed in a buffer.
 
 ## Substring kernel
 (Lodhi et al. 2002)
