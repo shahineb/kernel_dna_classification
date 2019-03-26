@@ -72,7 +72,10 @@ class KernelSVM(Classifier):
     def predict_prob(self, X):
         raise RuntimeError("No probability prediction for SVM")
 
-    def predict(self, X):
-        foo = self.kernel(self.Xtr[self.support_vectors], X)
+    def predict(self, X, precomputed=False):
+        if precomputed:
+            foo = X.astype(np.double)
+        else:
+            foo = self.kernel(self.Xtr[self.support_vectors], X)
         y_pred = np.sign(self.alpha[self.support_vectors] @ foo)
         return y_pred
