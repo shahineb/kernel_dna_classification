@@ -66,7 +66,7 @@ class KernelSVM(Classifier):
         # Solve problem
         sol = cvxopt.solvers.qp(Q, p, G, h)
         self._alpha = np.array(sol['x']).ravel()
-        self._support_vectors = np.where(np.abs(self._alpha) > self._support_vec_tol * self.C)[0]
+        self._support_vectors = np.where(np.abs(self._alpha) > self._support_vec_tol)[0]
         self._fitted = True
 
     def predict_prob(self, X):
