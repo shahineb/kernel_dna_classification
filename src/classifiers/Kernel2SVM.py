@@ -21,7 +21,7 @@ class Kernel2SVM(Classifier):
         verbose (int): in {0, 1}
     """
 
-    def __init__(self, kernel, lbda=1.0, support_vec_tol=1e-3, verbose=0):
+    def __init__(self, kernel=None, lbda=1.0, support_vec_tol=1e-3, verbose=0):
         super(Kernel2SVM, self).__init__(kernel=kernel, verbose=verbose)
         self._lbda = lbda
         self._support_vec_tol = support_vec_tol
@@ -49,10 +49,10 @@ class Kernel2SVM(Classifier):
     def fit(self, X, y, precomputed=True):
         # Kernel matrix and labels formatting
         self._Xtr = X
-        if precomputed:
-            K = X.astype(np.double)
-        else:
+        if self.kernel:
             K = self.kernel(X, X).astype(np.double)
+        else:
+            K = X.astype(np.double)
         y = Kernel2SVM.format_binary_labels(y).astype(np.double)
 
         # Setup cvxopt QP args
@@ -73,9 +73,9 @@ class Kernel2SVM(Classifier):
         raise RuntimeError("No probability prediction for SVM")
 
     def predict(self, X, precomputed=False):
-        if precomputed:
-            foo = X.astype(np.double)[self.support_vectors]
-        else:
+        if self.kernel:
             foo = self.kernel(self.Xtr[self.support_vectors], X)
+        else:
+            foo = X.astype(np.double)[self.support_vectors]
         y_pred = np.sign(self.alpha[self.support_vectors] @ foo)
         return y_pred
