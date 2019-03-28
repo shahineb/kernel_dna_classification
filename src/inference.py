@@ -10,6 +10,7 @@ def run(logger, dataloader, kernel, model, argsparser):
         gram_test = kernel(x_test, x_train)
         y_pred_test = model.predict(gram_test)
         y_pred_test[y_pred_test == -1] = 0
+        y_pred_test = y_pred_test.astype(int)
         list_preds += y_pred_test.tolist()
 
     with open("submission.csv", 'w') as f:

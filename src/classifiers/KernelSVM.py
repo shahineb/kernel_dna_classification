@@ -78,4 +78,4 @@ class KernelSVM(Classifier):
         else:
             foo = X[self.support_vectors]
         y_pred = np.sign(self.alpha[self.support_vectors] @ foo)
-        return y_pred
+        return y_pred.astype(int)
