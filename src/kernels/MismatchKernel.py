@@ -1,11 +1,14 @@
 import os
 import sys
+from joblib import Parallel, delayed
+
 
 base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../..")
 sys.path.append(base_dir)
 
 from src.kernels.SpectrumKernel import SpectrumKernel
 from utils.decorators import accepts
+import config
 
 
 class MismatchKernel(SpectrumKernel):
@@ -41,8 +44,13 @@ class MismatchKernel(SpectrumKernel):
                                              charset=charset,
                                              verbose=verbose)
         self._k = k
-        self._neighbors = {pattern: set(MismatchKernel._generate_neighbor(pattern, charset, k))
-                           for pattern in self._patterns}
+        if self._n > self.NMAX:
+            helper = lambda pattern: (pattern, MismatchKernel._generate_neighbor(pattern, charset, k))
+            items = Parallel(n_jobs=config.n_jobs)(delayed(helper)(pattern) for pattern in self._patterns)
+            self._neighbors = {pattern: neighbors for (pattern, neighbors) in items}
+        else:
+            self._neighbors = {pattern: set(MismatchKernel._generate_neighbor(pattern, charset, k))
+                               for pattern in self._patterns}
 
     @property
     def k(self):

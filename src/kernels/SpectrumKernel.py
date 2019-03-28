@@ -2,7 +2,8 @@ import os
 import sys
 import warnings
 from six import string_types
-from itertools import permutations
+from itertools import product
+from joblib import Parallel, delayed
 import numpy as np
 
 base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../..")
@@ -10,6 +11,7 @@ sys.path.append(base_dir)
 
 from src.kernels.Kernel import Kernel
 from utils.decorators import accepts
+import config
 
 
 class SpectrumKernel(Kernel):
@@ -27,12 +29,15 @@ class SpectrumKernel(Kernel):
         """
         super(SpectrumKernel, self).__init__(verbose)
         self._n = n
+        self._charset = charset
+        product_seed = self._n * ("ATCG",)
+        patterns = product(*product_seed)
+        join = lambda x: "".join(x)
         if self._n > SpectrumKernel.NMAX:
             warnings.warn(f"Becomes computationally expensive when n > {SpectrumKernel.NMAX}")
-        self._charset = charset
-        permutation_seed = n * charset
-        helper = lambda x: "".join(x)
-        self._patterns = list(map(helper, set(permutations(permutation_seed, self._n))))
+            self._patterns = Parallel(n_jobs=config.n_jobs)(delayed(join)(pattern) for pattern in patterns)
+        else:
+            self._patterns = list(map(join, patterns))
 
     @property
     def n(self):
