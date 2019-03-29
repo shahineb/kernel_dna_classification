@@ -29,7 +29,7 @@ class Kernel:
         return self._verbose
 
     @staticmethod
-    def order_arrays(self, X1, X2):
+    def order_arrays(X1, X2):
         """Sorts arrays by length
         Args:
             X1 (np.ndarray)

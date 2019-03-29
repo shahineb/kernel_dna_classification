@@ -116,10 +116,10 @@ class SpectrumKernel(StringKernel):
             for idx, seq in tqdm(enumerate(max_X[min_len:]), disable=self.verbose):
                 for i in range(seq_max_len - self.n):
                     subseq = self._get_tuple(seq, i)
-                    counts_max[idx] = self._count_pattern(subseq, counts_max[idx])
+                    counts_max[idx + min_len] = self._count_pattern(subseq, counts_max[idx + min_len])
             # Compute normalized inner product between spectral features
-            feats1 = np.array([np.fromiter(foo.values(), dtype=np.float32) for foo in counts_min.values()])
+            feats1 = np.array([np.fromiter(foo.values(), dtype=np.float32) for foo in counts_max.values()])
             norms1 = np.linalg.norm(feats1, axis=1).reshape(-1, 1)
-            feats2 = np.array([np.fromiter(foo.values(), dtype=np.float32) for foo in counts_max.values()])
+            feats2 = np.array([np.fromiter(foo.values(), dtype=np.float32) for foo in counts_min.values()])
             norms2 = np.linalg.norm(feats2, axis=1).reshape(-1, 1)
             return np.inner(feats1 / norms1, feats2 / norms2)
