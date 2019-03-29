@@ -5,18 +5,10 @@ import numpy as np
 base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../..")
 sys.path.append(base_dir)
 
-from src.evaluation.metrics import *
+from src.evaluation.metrics import disct_scoring_metrics
 
 
-disct_scoring_metrics = {"accuracy_score": accuracy_score,
-                         "precision_score": precision_score,
-                         "recall_score": recall_score,
-                         "specificity_score": specificity_score,
-                         "fpr_score": fpr_score,
-                         "auc_score": auc_score}
-
-
-def cross_validate(classifier, gram_matrix, ytrue, cv=5, scoring="accuracy_score"):
+def cross_validate(clf, gram_matrix, ytrue, cv=5, scoring="accuracy_score", verbose=True):
     """
     Args:
         clf (Classifier): classifier object
@@ -37,18 +29,18 @@ def cross_validate(classifier, gram_matrix, ytrue, cv=5, scoring="accuracy_score
     score_function = disct_scoring_metrics[scoring]
 
     for f in range(cv):
-        ids = np.arange(f*n//cv, (f+1)*n//cv)
+        ids = np.arange(f * n // cv, (f + 1) * n // cv)
         idxes_te = idxes[ids]
-        idxes_tr = np.array( list( set(idxes).difference(set(idxes_te)) ) )
+        idxes_tr = np.array(list(set(idxes).difference(set(idxes_te))))
 
         gram_matrix_tr = gram_matrix[idxes_tr[:, None], idxes_tr]
         gram_matrix_te = gram_matrix[idxes_tr[:, None], idxes_te]
-        ytr, yte = ytrue[idxes_tr] , ytrue[idxes_te]
+        ytr, yte = ytrue[idxes_tr], ytrue[idxes_te]
 
-        classifier.fit(gram_matrix_tr, ytr, precomputed=True)
-        ypred = classifier.predict(gram_matrix_te, precomputed=True)
-        scores.append( score_function(yte, ypred) )
+        clf.fit(gram_matrix_tr, ytr)
+        ypred = clf.predict(gram_matrix_te)
+        scores.append(score_function(yte, ypred))
 
-    print("Mean accuracy = {} - Std = {}".format(np.mean(scores), np.std(scores)))
-
+    if verbose:
+        print("Mean accuracy = {} - Std = {}".format(np.mean(scores), np.std(scores)))
     return scores

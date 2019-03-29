@@ -1,3 +1,7 @@
+"""
+This file is meant to provide a classifier catalog, centralizing and simplifying
+classfiers import for computation sessions
+"""
 import os
 import sys
 
@@ -9,8 +13,12 @@ from src.classifiers.KernelSVM import KernelSVM
 from src.classifiers.Kernel2SVM import Kernel2SVM
 
 choices = {'kernel-lr': KernelLogisticRegression,
-           'kernel-svm': KernelSVM}
+           'kernel-svm': KernelSVM,
+           'kernel-2svm': Kernel2SVM}
 
 
-def choose(name):
-    return choices[name]
+def choose(clf_name):
+    try:
+        return choices[clf_name]
+    except KeyError:
+        raise KeyError(f"Unkown classifier, please specify a key in {choices.keys()}")

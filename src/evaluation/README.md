@@ -18,4 +18,12 @@ Others:
 
 ## Selection
 
-`cross_validate`
+Provides cross validation utility which can be driven by any of the previous metrics.
+
+Cross validation must be provided with :
+
+- `clf`: a classifier instance
+- `gram_matrix`: precomputed Gram matrix of the training set
+- `ytrue`: groundtruth labels
+- `cv`: number of cross-validation folds
+- `scoring`: metric name to use

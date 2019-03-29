@@ -39,6 +39,11 @@ class Classifier:
 
     @staticmethod
     def format_binary_labels(labels):
+        """Enforces binary labels to values to be in {-1, 1}
+
+        Args:
+            labels (np.ndarray): (n_sample,)
+        """
         labels_ = labels.copy()
         labels_values = np.unique(labels)
         assert len(labels_values) == 2, "Please provide binary labels"
@@ -46,33 +51,46 @@ class Classifier:
         labels_[labels == labels_values[1]] = 1
         return labels_
 
-    @staticmethod
-    def evaluate(y_true, y_pred, val=True):
-        accuracy = np.mean(np.array(y_true == y_pred, dtype=int))
-        set = 'Validation' if val else 'Training'
-        print('Accuracy on the {} set: {:.2f}'.format(set, accuracy))
-
-    @abstractmethod
-    def fit(self, x, y, *args, **kwargs):
-        """Evaluates kernel on samples x and y
+    def evaluate(self, y_true, y_pred, val=True):
+        """Computes prediction accuracy
 
         Args:
-            x (hashable)
-            y (hashable)
+            y_true (np.ndarray): true labels
+            y_pred (np.ndarray): prediction
+        """
+        accuracy = np.mean(np.array(y_true == y_pred, dtype=int))
+        set = 'Validation' if val else 'Training'
+        if self.verbose:
+            print('Accuracy on the {} set: {:.2f}'.format(set, accuracy))
+        return accuracy
+
+    @abstractmethod
+    def fit(self, X, y, *args, **kwargs):
+        """Fits classifier to data
+
+        Args:
+            X (np.ndarray)
+            y (np.ndarray)
         """
         pass
 
     @abstractmethod
     @fitted
     def predict_prob(self, X):
-        """Predicts proba on samples x
+        """Predicts proba of samples X
 
         Args:
-
+            X (np.ndarray)
         """
         pass
 
     def predict(self, X, threshold=0.5):
+        """Predicts label of samples X
+
+        Args:
+            X (np.ndarray)
+            threshold (float): discrimination threshold
+        """
         y_pred = np.array(self.predict_prob(X) >= threshold, dtype=int)
         y_pred[y_pred == 0] = -1
         return np.squeeze(y_pred)

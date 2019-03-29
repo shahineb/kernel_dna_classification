@@ -2,6 +2,12 @@
 This file is meant to provide a kernel catalog, centralizing and simplifying
 kernels import for computation sessions
 """
+import os
+import sys
+
+base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../..")
+sys.path.append(base_dir)
+
 
 from src.kernels.SpectrumKernel import SpectrumKernel
 from src.kernels.SubstringKernel import SubstringKernel
@@ -21,4 +27,7 @@ choices = {'spectrum': SpectrumKernel,
 
 
 def choose(kernel_name):
-    return choices[kernel_name]
+    try:
+        return choices[kernel_name]
+    except KeyError:
+        raise KeyError(f"Unkown kernel, please specify a key in {choices.keys()}")
