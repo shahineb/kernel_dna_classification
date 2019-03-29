@@ -17,27 +17,50 @@ Xte0 = loader.get_test(k=0)
 Xte1 = loader.get_test(k=1)
 Xte2 = loader.get_test(k=2)
 
-
 kernel = MismatchKernel(n=8, k=1, charset="ATCG", verbose=1)
 
 
-gram_matrix = kernel(X0[:15], X0[:15])
-np.savetxt(X=gram_matrix, fname="foo.csv")
+# gram_matrix = kernel(X0[:15], X0[:15])
+# np.savetxt(X=gram_matrix, fname="foo.csv")
 
 gram_matrix = kernel(X0, X0)
-np.savetxt(X=gram_matrix, fname="mismatch9_00.csv")
+np.savetxt(X=gram_matrix, fname="mismatch_n8_k1_00.csv")
 
 gram_matrix = kernel(X1, X1)
-np.savetxt(X=gram_matrix, fname="mismatch9_11.csv")
+np.savetxt(X=gram_matrix, fname="mismatch_n8_k1_11.csv")
 
 gram_matrix = kernel(X2, X2)
-np.savetxt(X=gram_matrix, fname="mismatch9_22.csv")
+np.savetxt(X=gram_matrix, fname="mismatch_n8_k1_22.csv")
 
 gram_matrix = kernel(X0, Xte0)
-np.savetxt(X=gram_matrix, fname="mismatch9_test_00.csv")
+np.savetxt(X=gram_matrix, fname="mismatch_n8_k1_test_00.csv")
 
 gram_matrix = kernel(X1, Xte1)
-np.savetxt(X=gram_matrix, fname="mismatch9_test_11.csv")
+np.savetxt(X=gram_matrix, fname="mismatch_n8_k1_test_11.csv")
 
 gram_matrix = kernel(X2, Xte2)
-np.savetxt(X=gram_matrix, fname="mismatch9_test_22.csv")
+np.savetxt(X=gram_matrix, fname="mismatch_n8_k1_test_22.csv")
+
+
+kernel = MismatchKernel(n=9, k=2, charset="ATCG", verbose=1)
+
+gram_matrix = kernel(X0, Xte0)
+np.savetxt(X=gram_matrix, fname="mismatch_n9_k2_test_00.csv")
+
+gram_matrix = kernel(X1, Xte1)
+np.savetxt(X=gram_matrix, fname="mismatch_n9_k2_test_11.csv")
+
+gram_matrix = kernel(X2, Xte2)
+np.savetxt(X=gram_matrix, fname="mismatch_n9_k2_test_22.csv")
+
+
+kernel = MismatchKernel(n=9, k=1, charset="ATCG", verbose=1)
+
+gram_matrix = kernel(X0, Xte0)
+np.savetxt(X=gram_matrix, fname="mismatch_n9_k1_test_00.csv")
+
+gram_matrix = kernel(X1, Xte1)
+np.savetxt(X=gram_matrix, fname="mismatch_n9_k1_test_11.csv")
+
+gram_matrix = kernel(X2, Xte2)
+np.savetxt(X=gram_matrix, fname="mismatch_n9_k1_test_22.csv")
