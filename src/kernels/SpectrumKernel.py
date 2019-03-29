@@ -4,6 +4,7 @@ import warnings
 from six import string_types
 from itertools import product
 from joblib import Parallel, delayed
+from tqdm import tqdm
 import numpy as np
 
 base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../..")
@@ -105,7 +106,7 @@ class SpectrumKernel(Kernel):
         else:
             counts_min = {idx: {perm: 0 for perm in self.patterns} for idx in range(len(min_X))}
             counts_max = {idx: {perm: 0 for perm in self.patterns} for idx in range(len(max_X))}
-            for idx, (seq1, seq2) in enumerate(zip(min_X, max_X)):
+            for idx, (seq1, seq2) in tqdm(enumerate(zip(min_X, max_X)), disable=self.verbose):
                 for i in range(seq_max_len - self.n):
                     subseq1 = self._get_tuple(seq1, i)
                     counts_min[idx] = self._count_pattern(subseq1, counts_min[idx])
