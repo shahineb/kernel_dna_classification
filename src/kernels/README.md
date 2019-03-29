@@ -9,7 +9,7 @@ See [wiki on kernel manipulation](https://github.com/shahineb/kernel_challenge/w
   - `n` : mer length to be considered
   - `charset` : string with all chars to be considered (e.g "ATCG")
 
-It's based on the number of occurences of each n-uple made out of the provided set of chars. The proposed implementation presents a preindexed version of this kernel, making it hence very computationally efficient. However, we recommend not to use a tuple lenght greater than 7.
+It's based on the number of occurences of each n-uple made out of the provided set of chars. The proposed implementation presents a preindexed version of this kernel, making it hence very computationally efficient. However, we recommend not to use a mer length greater than 8 to avoid facing memory issues
 
 ## Mismatch Kernel
 (Leslie et al. 2003)
@@ -17,9 +17,9 @@ It's based on the number of occurences of each n-uple made out of the provided s
 `MismatchKernel` is initialized by :
   - `n` : mer length to be considered
   - `charset` : string with all chars to be considered (e.g "ATCG")
-  - `k` : maxmimum number of mismatch allowed
+  - `k` : maximmum number of mismatch allowed
 
-It is very similar to the Spectrum Kernel expect for the fact that for a given sequence, we count occurences of each n-uples along with their k-neighbors. For example, with n=3 and k=1, if we parse sequence `'AAA'`, it would also count for `{'AAC', 'AAG', 'AAT', 'ACA', 'AGA', 'ATA', 'CAA', 'GAA', 'TAA'}`.
+Similar to the Spectrum Kernel expect for the fact that for a given sequence, we count occurences of each n-mer along with their k-neighbors. For example, with n=3 and k=1, if we parse sequence `'AAA'`, it would also count for `{'AAC', 'AAG', 'AAT', 'ACA', 'AGA', 'ATA', 'CAA', 'GAA', 'TAA'}`.
 
 ## Weighted Degree Kernel
 (Ratsch and Sonnenburg, 2004)
@@ -27,7 +27,18 @@ It is very similar to the Spectrum Kernel expect for the fact that for a given s
 `WDKernel` is initialized by:
   - `n` : maximal mer length to be considered
 
-Compares co-occurences of k-mers at corresponding position in sequences. Implementation is performed in a linear time by parsing characters successively and keeping track of last k-mers parsed in a buffer.
+Compares co-occurences of k-mers at corresponding position in sequences. Implementation is performed in a linear time by parsing characters successively and keeping track of last k-mers parsed in a buffer. A weight decreasing with k is applied when matching k-mers. This could seem counter-intuitive as we would expect large k-mers matching to weight in more. However, a large k-mer matching induces several smaller mers matchings which eventually entails the desired behavior.
+
+## Shift Weighted Degree Kernel
+(Ratsch and Sonnenburg, 2004)
+
+`ShiftWDKernel` is initialized by:
+  - `n` : maximal mer length to be considered
+  - `shift` : maximal shift size
+
+Similar to weighted degree kernel but allowing a non-alignement up to the specified shift value. However, when matching with shift, a lower weight is applied. As a forward shift of a sequence wrt to the other basically consists of a backward shift of the latter wrt the former, we use this symmetry property to only use forward shift in out implementation.
+
+![sequences alignement with shift](https://github.com/shahineb/kernel_challenge/blob/shahine/docs/svg/swd.png)
 
 ## Substring kernel
 (Lodhi et al. 2002)

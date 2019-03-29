@@ -5,22 +5,17 @@ import numpy as np
 base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../..")
 sys.path.append(base_dir)
 
-from src.kernels.Kernel import Kernel
+from src.kernels.Kernel import StringKernel
 from utils.decorators import accepts
 
 
-class WDKernel(Kernel):
+class WDKernel(StringKernel):
     """Implementation of (Ratsch and Sonnenburg, 2004)
     """
 
     @accepts(int, int)
     def __init__(self, n, verbose=1):
-        super(WDKernel, self).__init__(verbose)
-        self._n = n
-
-    @property
-    def n(self):
-        return self._n
+        super(WDKernel, self).__init__(n, verbose)
 
     def _kmer_weight(self, k):
         """Computes mer weight given Ratsch and Sonnenburg, 2004
@@ -59,15 +54,18 @@ class WDKernel(Kernel):
         seq_size = len(seq1)
         assert len(seq2) == seq_size, "Sequence must have identical length"
         assert seq_size > self.n, "Sequence must be longer than max mer size"
+        # Initialize weights, buffers and cumulative sum
         weights = self._kmer_weight(np.arange(1, self.n + 1))
         buffer1 = np.empty(self.n, dtype='<U15')
         buffer2 = np.empty(self.n, dtype='<U15')
         cum_sum = 0
 
+        # First start filling buffer and matching k-mers for k < n
         for i in range(self.n):
             buffer1 = self._fill_buffer(seq1[i], buffer1)
             buffer2 = self._fill_buffer(seq2[i], buffer2)
             cum_sum += np.inner(weights[:i + 1], buffer1[:i + 1] == buffer2[:i + 1])
+        # Continue sequences parsing
         for i in range(self.n, seq_size):
             buffer1 = self._update_buffer(seq1[i], buffer1)
             buffer2 = self._update_buffer(seq2[i], buffer2)

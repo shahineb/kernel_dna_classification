@@ -40,6 +40,13 @@ class MismatchKernel(SpectrumKernel):
 
     @accepts(int, int, str, int)
     def __init__(self, n, k, charset, verbose=0):
+        """
+        Args:
+            n (int): n-mers size to consider
+            k (int): number of mismatch allowed
+            charset (str): charset for preindexation (typically "ATCG")
+            verbose (int): {0, 1}
+        """
         super(MismatchKernel, self).__init__(n=n,
                                              charset=charset,
                                              verbose=verbose)

@@ -28,6 +28,19 @@ class Kernel:
     def verbose(self):
         return self._verbose
 
+    @staticmethod
+    def order_arrays(self, X1, X2):
+        """Sorts arrays by length
+        Args:
+            X1 (np.ndarray)
+            X2 (np.ndarray)
+        """
+        X = [X1, X2]
+        X.sort(key=len)
+        min_X, min_len = X[0], len(X[0])
+        max_X, max_len = X[1], len(X[1])
+        return min_X, max_X, min_len, max_len
+
     def __call__(self, x, y):
         if isinstance(x, np.ndarray) and isinstance(y, np.ndarray):
             return self._pairwise(x, y)
@@ -56,10 +69,7 @@ class Kernel:
             X2 (np.ndarray)
         """
         # Order arrays by dimensionality and initialize matrix
-        X = [X1, X2]
-        X.sort(key=len)
-        min_X, min_len = X[0], len(X[0])
-        max_X, max_len = X[1], len(X[1])
+        min_X, max_X, min_len, max_len = Kernel.order_arrays(X1, X2)
         pairwise_matrix = np.zeros((min_len, max_len), dtype=np.float32)
 
         # Precompute all norms K(x_i,x_i)
@@ -85,6 +95,8 @@ class Kernel:
 
         rows = Parallel(n_jobs=config.n_jobs)(delayed(helper)(i) for i in tqdm(range(min_len), disable=self.verbose))
         pairwise_matrix = np.stack(rows)
+
+        # Use symetry to fill matrix
         pairwise_matrix[:, :min_len] = pairwise_matrix[:, :min_len] + pairwise_matrix.T[:min_len] - np.diag(pairwise_matrix) * np.eye(min_len)
 
         # Return matrix in correct orientation
@@ -92,3 +104,32 @@ class Kernel:
             return pairwise_matrix.transpose()
         else:
             return pairwise_matrix
+
+
+class StringKernel(Kernel):
+    """ Parent abstract class of general string kernels
+    """
+    __metaclass__ = ABCMeta
+
+    def __init__(self, n, verbose, *args, **kwargs):
+        """
+        Args:
+            n (int): n-mer size to consider
+            verbose (int): in {0, 1}
+        """
+        super(StringKernel, self).__init__(verbose)
+        self._n = n
+
+    @property
+    def n(self):
+        return self._n
+
+    @abstractmethod
+    def _evaluate(self, x, y):
+        """Evaluates kernel on samples x and y
+
+        Args:
+            x (hashable)
+            y (hashable)
+        """
+        pass

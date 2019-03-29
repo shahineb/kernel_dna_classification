@@ -10,32 +10,30 @@ pyximport.install(setup_args={"include_dirs": np.get_include()})
 base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../..")
 sys.path.append(base_dir)
 
-from src.kernels.Kernel import Kernel
+from src.kernels.Kernel import StringKernel
 from utils.decorators import accepts
 import src.kernels.bin.substring as c
 
 
-class SubstringKernel(Kernel):
+class SubstringKernel(StringKernel):
     """Implementation of Lodhi et al. 2002
     inspired from https://github.com/timshenkao/StringKernelSVM/blob/master/stringSVM.py
 
+    Implementation is optimized with cache usage for recursive computations and
+    cython static types declaration
+
     Attributes:
-        n (int): n-uplet size to consider
+        n (int): n-mer size to consider
         decay_rate (float): decay parameter in ]0, 1[
     """
     NMAX = 2
 
     @accepts(int, float, int)
     def __init__(self, n, decay_rate, verbose=1):
-        super(SubstringKernel, self).__init__(verbose)
-        self._n = n
+        super(SubstringKernel, self).__init__(n, verbose)
         if self._n > SubstringKernel.NMAX:
             warnings.warn(f"Becomes computationally expensive when n > {SubstringKernel.NMAX}")
         self._decay_rate = decay_rate
-
-    @property
-    def n(self):
-        return self._n
 
     @property
     def decay_rate(self):

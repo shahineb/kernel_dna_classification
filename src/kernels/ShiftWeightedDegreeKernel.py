@@ -52,14 +52,24 @@ class ShiftWDKernel(WDKernel):
         return buffer
 
     def _evaluate(self, seq1, seq2):
+        """ We only apply forward shift as a forward shift for seq1
+        wrt seq2 basically consist in a backward shift of seq2 wrt
+        seq1
+
+        Args:
+            seq1 (str): dna sequence
+            seq2 (str): dna sequence
+        """
         seq_size = len(seq1)
         assert len(seq2) == seq_size, "Sequence must have identical length"
         assert seq_size > max(self.n, self.shift), "Sequence must be longer than max mer and shift size"
+        # Initialize weights, buffers and cumulative sum
         kmer_weights = self._kmer_weight(np.arange(1, self.n + 1))
         shift_weights = self._shift_weight(np.arange(0, self.shift + 1)).reshape(-1, 1)
         buffer1 = np.empty((self.n, self.shift + 1), dtype='<U15')
         buffer2 = np.empty((self.n, self.shift + 1), dtype='<U15')
         cum_sum = 0
+        # First start filling buffer and matching k-mers for k < n
         for i in range(self.n):
             buffer1 = self._fill_buffer(seq1[i: i + self.shift + 1], buffer1)
             buffer2 = self._fill_buffer(seq2[i: i + self.shift + 1], buffer2)
@@ -67,6 +77,7 @@ class ShiftWDKernel(WDKernel):
             matches2 = np.array([buffer2[:, 0] == row for row in buffer1.T]) * shift_weights
             cum_sum += np.sum(np.inner(matches1[:, :i + 1], kmer_weights[:i + 1]))
             cum_sum += np.sum(np.inner(matches2[:, :i + 1], kmer_weights[:i + 1]))
+        # Continue sequences parsing up to sequence size - shift size
         for i in range(self.n, seq_size - self.shift):
             buffer1 = self._update_buffer(seq1[i: i + self.shift + 1], buffer1)
             buffer2 = self._update_buffer(seq2[i: i + self.shift + 1], buffer2)
@@ -74,6 +85,7 @@ class ShiftWDKernel(WDKernel):
             matches2 = shift_weights * np.array([buffer2[:, 0] == row for row in buffer1.T])
             cum_sum += np.sum(np.inner(matches1, kmer_weights))
             cum_sum += np.sum(np.inner(matches2, kmer_weights))
+        # Parse last chars as if no shift as involved
         buffer1 = buffer1[:, 0]
         buffer2 = buffer2[:, 0]
         for i in range(seq_size - self.shift, seq_size):

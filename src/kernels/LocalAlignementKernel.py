@@ -66,6 +66,10 @@ class LocalAlignementKernel(Kernel):
         return self._char2idx
 
     def _evaluate(self, seq1, seq2):
+        """Cython static types declaration implementation if available in bin/
+        However, due to numerical overflow handling issues with the available
+        numerical types in the C-API of numpy we stick with this implementation
+        """
         seqs = [seq1, seq2]
         seqs.sort(key=len)
         min_seq, min_len = seqs[0], len(seqs[0]) + 1
