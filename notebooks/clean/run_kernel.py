@@ -5,7 +5,7 @@ import numpy as np
 base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../..")
 sys.path.append(base_dir)
 
-from src.kernels.kernels import LocalAlignementKernel
+from src.kernels.kernels import MismatchKernel
 from utils.DataLoader import DataLoader
 
 loader = DataLoader()
@@ -18,26 +18,26 @@ Xte1 = loader.get_test(k=1)
 Xte2 = loader.get_test(k=2)
 
 
-kernel = LocalAlignementKernel()
+kernel = MismatchKernel(n=8, k=1, charset="ATCG", verbose=1)
 
 
 gram_matrix = kernel(X0[:15], X0[:15])
 np.savetxt(X=gram_matrix, fname="foo.csv")
 
 gram_matrix = kernel(X0, X0)
-np.savetxt(X=gram_matrix, fname="localalignement_00.csv")
+np.savetxt(X=gram_matrix, fname="mismatch9_00.csv")
 
 gram_matrix = kernel(X1, X1)
-np.savetxt(X=gram_matrix, fname="localalignement_11.csv")
+np.savetxt(X=gram_matrix, fname="mismatch9_11.csv")
 
 gram_matrix = kernel(X2, X2)
-np.savetxt(X=gram_matrix, fname="localalignement_22.csv")
+np.savetxt(X=gram_matrix, fname="mismatch9_22.csv")
 
 gram_matrix = kernel(X0, Xte0)
-np.savetxt(X=gram_matrix, fname="localalignement_test_00.csv")
+np.savetxt(X=gram_matrix, fname="mismatch9_test_00.csv")
 
 gram_matrix = kernel(X1, Xte1)
-np.savetxt(X=gram_matrix, fname="localalignement_test_11.csv")
+np.savetxt(X=gram_matrix, fname="mismatch9_test_11.csv")
 
 gram_matrix = kernel(X2, Xte2)
-np.savetxt(X=gram_matrix, fname="localalignement_test_22.csv")
+np.savetxt(X=gram_matrix, fname="mismatch9_test_22.csv")

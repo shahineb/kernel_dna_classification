@@ -92,34 +92,31 @@ class SpectrumKernel(Kernel):
             return np.inner(feats1, feats2)
 
     def _pairwise(self, X1, X2):
-        """
-        Args:
-            X1 (np.ndarray)
-            X2 (np.ndarray)
-        """
-        min_len = min(map(len, np.hstack([X1, X2])))
-        max_len = max(map(len, np.hstack([X1, X2])))
-        if min_len < self.n:
+        # Order arrays by dimensionality and initialize matrix
+        X = [X1, X2]
+        X.sort(key=len)
+        min_X, min_len = X[0], len(X[0])
+        max_X, max_len = X[1], len(X[1])
+        seq_min_len = min(map(len, np.hstack([X1, X2])))
+        seq_max_len = max(map(len, np.hstack([X1, X2])))
+        assert seq_min_len == seq_max_len, "All sequences must have same length"
+        if seq_min_len < self.n:
             return 0
         else:
-            counts1 = {idx: {perm: 0 for perm in self.patterns} for idx in range(len(X1))}
-            counts2 = {idx: {perm: 0 for perm in self.patterns} for idx in range(len(X2))}
-            for i in range(max_len - self.n):
-                for idx, seq in enumerate(X1):
-                    try:
-                        subseq = self._get_tuple(seq, i)
-                        counts1[idx] = self._count_pattern(subseq, counts1[idx])
-                    except KeyError:
-                        pass
-                for idx, seq in enumerate(X2):
-                    try:
-                        subseq = self._get_tuple(seq, i)
-                        counts2[idx] = self._count_pattern(subseq, counts2[idx])
-                    except KeyError:
-                        pass
-
-            feats1 = np.array([np.fromiter(foo.values(), dtype=np.float32) for foo in counts1.values()])
+            counts_min = {idx: {perm: 0 for perm in self.patterns} for idx in range(len(min_X))}
+            counts_max = {idx: {perm: 0 for perm in self.patterns} for idx in range(len(max_X))}
+            for idx, (seq1, seq2) in enumerate(zip(min_X, max_X)):
+                for i in range(seq_max_len - self.n):
+                    subseq1 = self._get_tuple(seq1, i)
+                    counts_min[idx] = self._count_pattern(subseq1, counts_min[idx])
+                    subseq2 = self._get_tuple(seq2, i)
+                    counts_max[idx] = self._count_pattern(subseq2, counts_max[idx])
+            for idx, seq in max_X[min_len:]:
+                for i in range(seq_max_len - self.n):
+                    subseq = self._get_tuple(seq, i)
+                    counts_max[idx] = self._count_pattern(subseq, counts_max[idx])
+            feats1 = np.array([np.fromiter(foo.values(), dtype=np.float32) for foo in counts_min.values()])
             norms1 = np.linalg.norm(feats1, axis=1).reshape(-1, 1)
-            feats2 = np.array([np.fromiter(foo.values(), dtype=np.float32) for foo in counts2.values()])
+            feats2 = np.array([np.fromiter(foo.values(), dtype=np.float32) for foo in counts_max.values()])
             norms2 = np.linalg.norm(feats2, axis=1).reshape(-1, 1)
             return np.inner(feats1 / norms1, feats2 / norms2)
