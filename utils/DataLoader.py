@@ -45,3 +45,4 @@ class DataLoader:
     def get_test(self, k=0):
         x_test = self.load('Xte{}.csv'.format(k)).values
         return np.squeeze(x_test)
+
