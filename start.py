@@ -53,7 +53,7 @@ def compute_kernels(loader):
 
 def get_kernels(args, loader):
     if args.precompute:
-        compute_kernels(loader)
+        return compute_kernels(loader)
     else:
         return load_precomputed_kernels(loader)
 
