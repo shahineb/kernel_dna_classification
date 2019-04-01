@@ -2,6 +2,14 @@ import os
 import sys
 import numpy as np
 import argparse
+import logging
+
+# Logging
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+console.setFormatter(logging.Formatter('[%(asctime)s %(levelname)-3s @%(name)s] %(message)s', datefmt='%H:%M:%S'))
+logging.basicConfig(level=logging.DEBUG, handlers=[console])
+logger = logging.getLogger("Kernelito")
 
 cur_dir = os.getcwd()
 base_dir = os.path.dirname(os.path.dirname(cur_dir))
@@ -37,7 +45,8 @@ def load_precomputed_kernels(loader):
 def compute_kernels(loader):
     from src.kernels.MismatchKernel import MismatchKernel as Mismatch
     mism8 = Mismatch(n=8, k=1, charset="ATCG", verbose=1)
-    mism9 = Mismatch(n=9, k=2, charset="ATCG", verbose=1)
+    mism9_1 = Mismatch(n=9, k=1, charset="ATCG", verbose=1)
+    mism9_2 = Mismatch(n=9, k=2, charset="ATCG", verbose=1)
 
     X0, _, y0, __ = loader.get_train_val(k=0, val_size=0.)
     X1, _, y1, __ = loader.get_train_val(k=1, val_size=0.)
@@ -45,9 +54,9 @@ def compute_kernels(loader):
     Xte0 = loader.get_test(k=0)
     Xte1 = loader.get_test(k=1)
     Xte2 = loader.get_test(k=2)
-    X0 = mism8(X0, X0) + mism9(X0, X0)
-    X1 = mism9(X1, X1)
-    X2 = mism8(X2, X2) + mism9(X2, X2)
+    X0 = mism8(X0, X0) + mism9_2(X0, X0)
+    X1 = mism9_1(X1, X1)
+    X2 = mism8(X2, X2) + mism9_2(X2, X2)
     return X0, Xte0, X1, Xte1, X2, Xte2
 
 
@@ -67,10 +76,14 @@ def predict(X, y, lbda, Xte):
 
 def run(args):
     loader = DataLoader()
+    logger.info("Loading data Gram matrices ...")
     X0, Xte0, X1, Xte1, X2, Xte2 = get_kernels(args, loader)
     ytr0, ytr1, ytr2 = get_labels(loader)
+    logger.info("Prediction on dataset 0 ...")
     ypred0 = predict(X0, ytr0, 1.6e-3, Xte0)
+    logger.info("Prediction on dataset 1 ...")
     ypred1 = predict(X1, ytr1, 1.1e-3, Xte1)
+    logger.info("Prediction on dataset 2...")
     ypred2 = predict(X2, ytr2, .00081895, Xte2)
 
     list_preds = []
@@ -79,13 +92,14 @@ def run(args):
         y_pred_test = y_pred_test.astype(int)
         list_preds += y_pred_test.tolist()
 
-    with open("submission.csv", 'w') as f:
+    with open("Yte.csv", 'w') as f:
         f.write('Id,Bound\n')
         for i in range(len(list_preds)):
             f.write(str(i) + ',' + str(list_preds[i]) + '\n')
+    logger.info("Results saved in Yte.csv! ")
 
 if __name__ == "__main__":
 
     argparser = argparse.ArgumentParser(description='Run scripts for the MVA Kernel Methods Kaggle')
-    argparser.add_argument('--precompute', action='store_true', help='enable early_stopping')
+    argparser.add_argument('--precompute', action='store_true', help='use this to recompute kernel gram matrices')
     run(argparser.parse_args())
