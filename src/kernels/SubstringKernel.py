@@ -4,15 +4,15 @@ import warnings
 from functools import lru_cache
 import numpy as np
 import pyximport
+from .Kernel import StringKernel
 
 pyximport.install(setup_args={"include_dirs": np.get_include()})
 
 base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../..")
 sys.path.append(base_dir)
 
-from src.kernels.Kernel import StringKernel
-from utils.decorators import accepts
 import src.kernels.bin.substring as c
+from utils.decorators import accepts
 
 
 class SubstringKernel(StringKernel):
