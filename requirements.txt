@@ -1,6 +1,6 @@
 cycler==0.10.0
 Cython==0.29.6
-joblib==0.13.2
+joblib==1.2.0
 kiwisolver==1.0.1
 llvmlite==0.28.0
 matplotlib==3.0.3
